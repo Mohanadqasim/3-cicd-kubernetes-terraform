@@ -37,20 +37,21 @@ data "aws_subnets" "default" {
 }
 
 # Fetch the most recent Amazon Linux 2023 AMI for x86_64 architecture
-data "aws_ami" "amazon_linux" {
+data "aws_ami" "ubuntu" {
   most_recent = true       # Always select the newest matching AMI
-  owners      = ["amazon"] # Only official Amazon-owned AMIs
+ owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"
-    values = ["al2023-ami-*-x86_64"] # Match Amazon Linux 2023 x86_64 images
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
 }
 
 # Create an EC2 instance to host the application
 resource "aws_instance" "app_server" {
-  ami                         = data.aws_ami.amazon_linux.id
-  instance_type               = "t3.micro"
+  ami = data.aws_ami.ubuntu.id
+
+  instance_type               = "t3.small" # Small instance type for testing
   subnet_id                   = data.aws_subnets.default.ids[0]
   user_data                   = file("${path.module}/user-data.sh")
   vpc_security_group_ids      = [aws_security_group.k8s-sg.id]
