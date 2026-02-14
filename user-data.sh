@@ -1,18 +1,13 @@
 #!/bin/bash
-set -eux
 
 # Update system
-yum update -y
+dnf update -y
 
-# Install Docker
-yum install -y docker
+# Install k3s (latest stable)
+curl -sfL https://get.k3s.io | sh -
 
-# Start Docker and enable on boot
-systemctl start docker
-systemctl enable docker
+# Wait for cluster to initialize
+sleep 30
 
-# Allow ec2-user to run docker without sudo
-usermod -aG docker ec2-user
-
-# Log completion
-echo "Docker installed successfully" > /var/log/user-data.log
+# Check node status
+kubectl get nodes
